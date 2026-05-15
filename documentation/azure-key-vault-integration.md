@@ -73,6 +73,8 @@ export AZURE_CLIENT_SECRET=<your-client-secret>
 export AZURE_TENANT_ID=<your-tenant-id>
 ```
 
+> **Note (personal):** In my local dev setup I use `az login` with the Azure CLI instead of setting these env vars manually. Much easier to manage — just make sure you're logged into the right tenant with `az account show` before running Flyway.
+
 ## Secret Versioning
 
 To reference a specific version of a secret, use the `@version` suffix:
@@ -88,37 +90,4 @@ If no version is specified, the latest enabled version is used.
 - **Least Privilege**: Grant only `Key Vault Secrets User` (read) permissions to the Flyway identity — never `Key Vault Administrator`.
 - **Network Restrictions**: Consider restricting Key Vault access to specific virtual networks or IP ranges.
 - **Audit Logging**: Enable Key Vault diagnostic logging to track secret access.
-- **Secret Rotation**: When rotating secrets, update the Key Vault secret value; Flyway will pick up the new value on the next run.
-
-## Troubleshooting
-
-### `SecretNotFoundException`
-
-Verify the secret name matches exactly (case-sensitive) and that the secret is enabled in Key Vault.
-
-### `AuthenticationFailedException`
-
-Ensure the identity running Flyway has been granted the `Key Vault Secrets User` role on the Key Vault resource.
-
-### `KeyVaultErrorException: Forbidden`
-
-The Key Vault firewall may be blocking access. Check the Key Vault network settings and ensure the client IP or VNet is allowed.
-
-## Example: Spring Boot Integration
-
-```yaml
-spring:
-  flyway:
-    url: jdbc:sqlserver://myserver.database.windows.net:1433;database=mydb
-    user: ${akv:sql-username}
-    password: ${akv:sql-password}
-    azure:
-      key-vault:
-        url: https://my-keyvault.vault.azure.net/
-```
-
-## Related
-
-- [Azure Key Vault Documentation](https://docs.microsoft.com/en-us/azure/key-vault/)
-- [Azure Identity SDK for Java](https://docs.microsoft.com/en-us/java/api/overview/azure/identity-readme)
-- [Flyway Configuration Reference](https://documentation.red-gate.com/flyway/flyway-cli-and-api/configuration/parameters)
+- **Secret Rotation**: When rotating secrets, update the secret value in Key Vault and restart the Flyway process (or redeploy) to pick up the new version. If you pin a specific `@version` in your config, remember to update that reference as well.
