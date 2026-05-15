@@ -85,9 +85,8 @@ flyway.password=${akv:db-password@abc123def456}
 
 If no version is specified, the latest enabled version is used.
 
+> **Note (personal):** I pin secret versions in staging/prod configs so a secret rotation doesn't silently change credentials mid-deployment. Learned this the hard way after a surprise rotation broke a pipeline. For local dev, unpinned (latest) is fine.
+
 ## Security Considerations
 
 - **Least Privilege**: Grant only `Key Vault Secrets User` (read) permissions to the Flyway identity — never `Key Vault Administrator`.
-- **Network Restrictions**: Consider restricting Key Vault access to specific virtual networks or IP ranges.
-- **Audit Logging**: Enable Key Vault diagnostic logging to track secret access.
-- **Secret Rotation**: When rotating secrets, update the secret value in Key Vault and restart the Flyway process (or redeploy) to pick up the new version. If you pin a specific `@version` in your config, remember to update that reference as well.
